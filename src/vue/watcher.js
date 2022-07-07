@@ -2,11 +2,12 @@ import Dep, {
 	pushTarget,
 	popTarget
 } from './dep'
+
 let id = 0
 export default class Watcher {
 	constructor(vm, fn, op = {
 		lazy: false
-	}) {
+	}, cb) {
 		this.id = id++
 		this.getter = fn.bind(vm)
 		this.deps = []
@@ -16,12 +17,11 @@ export default class Watcher {
 	}
 	eval() {
 		this.value = this.get()
-		// this.dirty = false
+		this.dirty = false
 	}
 	depend() { // watcher的depend 就是让watcher中dep去depend
 		let i = this.deps.length;
 		while (i--) {
-			// dep.depend()
 			this.deps[i].depend(); // 让计算属性watcher 也收集渲染watcher
 		}
 	}
@@ -40,11 +40,16 @@ export default class Watcher {
 		dep.addSub(this)
 	}
 	update() {
-		queueWatcher(this)
+		if (this.lazy) {
+			// 如果是计算属性  依赖的值变化了 就标识计算属性是脏值了
+			this.dirty = true;
+		} else {
+			queueWatcher(this); // 把当前的watcher 暂存起来
+		}
 	}
 	run() {
-		console.log('update');
-		this.get()
+		const oldV = this.value,
+			newV = this.get()
 	}
 }
 

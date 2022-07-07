@@ -14,7 +14,7 @@ import {
 import Dep from './dep'
 
 function defineComputed(target, k, def) {
-	const setter = typeof def === 'function' ? (() => {}) : def.set
+	const setter = typeof def === 'function' ? (() => { }) : def.set
 	Object.defineProperty(target, k, {
 		get: createComputedGetter.bind(target, k),
 		set: setter,
@@ -37,6 +37,7 @@ class Vue {
 		this.$options = op
 		this.initData()
 		this.initComputed()
+		this.initWatch()
 	}
 
 	initData() {
@@ -65,6 +66,22 @@ class Vue {
 		})
 	}
 
+	initWatch() {
+		// const watchers = this._watchWatchers = {}
+
+		// Object.entries(this.$options.watch || {}).forEach(([k, v]) => {
+		// 	const cb = v;
+		// 	_watchWatchers[k] = new Watcher(this, ()=>this[k], {
+		// 		lazy: true
+		// 	})
+		// 	Object.defineProperty(target, k, {
+		// 		set(val){
+
+		// 		},
+		// 	})
+		// })
+	}
+
 	// data代理到vue实例
 	_proxy(key, type) {
 		Object.defineProperty(this, key, {
@@ -81,7 +98,7 @@ class Vue {
 
 Vue.prototype.$nextTick = nextTick
 // 下列所有内容关乎视图渲染，暂时没学
-Vue.prototype.$mount = function(elName) {
+Vue.prototype.$mount = function (elName) {
 	const el = this.$el = document.querySelector(elName)
 
 	// const render = () => {

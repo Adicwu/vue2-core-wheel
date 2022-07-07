@@ -11,6 +11,8 @@ const aa = new Vue({
   computed: {
     test: {
       get() {
+        // debugger;
+        console.log('test get');
         // return this.author + '--' + this.age
         return this.age + '--' + this.list.join('~')
       },
@@ -19,6 +21,11 @@ const aa = new Vue({
         this.age = val
       }
     }
+  },
+  watch: {
+    age(newV, oldV) {
+      console.log('AGE CHANGE', newV, oldV);
+    }
   }
 }).$mount('#app')
 console.log('ready', aa)
@@ -26,10 +33,13 @@ setTimeout(() => {
   // aa.list.push(3)
   // aa.age = 22
   aa.test = 23
-  console.log('end', aa);
+  // console.log('end', aa);
+  // setTimeout(() => {
+  //   aa.test = 33
+  // }, 2000)
 }, 1000)
 
-// aa.list[1] = 2 
+// aa.list[1] = 2
 // console.log(aa);
 // setTimeout(() => {
 // 	aa.author = 'lucy'
