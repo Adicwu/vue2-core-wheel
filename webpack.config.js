@@ -35,4 +35,6 @@ module.exports = {
     filename: 'index.html',
     template: __dirname + "/public/index.html"
   })],
+  // 开发环境下在浏览器显示源码
+  devtool: 'eval-source-map'
 }
