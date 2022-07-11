@@ -3,9 +3,9 @@ import Vue from "./vue/index";
 const aa = new Vue({
   data() {
     return {
-      author: 'adic',
+      // author: 'adic',
       age: 18,
-      list: [1, 2]
+      // list: [1, 2]
     }
   },
   computed: {
@@ -14,12 +14,13 @@ const aa = new Vue({
         // debugger;
         console.log('test get');
         // return this.author + '--' + this.age
-        return this.age + '--' + this.list.join('~')
+        return this.age
+        // + '--' + this.list.join('~')
       },
-      set(val) {
-        console.log(this, val, 'set');
-        this.age = val
-      }
+      // set(val) {
+      //   console.log(this, val, 'set');
+      //   this.age = val
+      // }
     }
   },
   watch: {
@@ -31,13 +32,16 @@ const aa = new Vue({
 console.log('ready', aa)
 setTimeout(() => {
   // aa.list.push(3)
-  // aa.age = 22
-  aa.test = 23
+  aa.age = 22
+  // aa.test = 23
   // console.log('end', aa);
   // setTimeout(() => {
   //   aa.test = 33
   // }, 2000)
 }, 1000)
+setTimeout(() => {
+  aa.age = 23
+}, 2000)
 
 // aa.list[1] = 2
 // console.log(aa);

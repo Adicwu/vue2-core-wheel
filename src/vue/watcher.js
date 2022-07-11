@@ -5,14 +5,19 @@ import Dep, {
 
 let id = 0
 export default class Watcher {
-	constructor(vm, fn, op = {
-		lazy: false
+	constructor(vm, exprOrFn, op = {
+		lazy: false,
+		user: false
 	}, cb) {
 		this.id = id++
-		this.getter = fn.bind(vm)
 		this.deps = []
 		this.depsId = new Set()
-		this.lazy = this.dirty = op.lazy;
+
+		this.getter = typeof exprOrFn === 'string' ? () => vm[exprOrFn] : exprOrFn.bind(vm)
+		this.user = Boolean(op.user)
+		this.vm = vm
+		this.cb = cb
+		this.lazy = this.dirty = Boolean(op.lazy);
 		this.value = this.lazy ? undefined : this.get()
 	}
 	eval() {
@@ -50,6 +55,10 @@ export default class Watcher {
 	run() {
 		const oldV = this.value,
 			newV = this.get()
+		if (this.user) {
+			this.value = newV
+			this.cb.call(this.vm, newV, oldV)
+		}
 	}
 }
 

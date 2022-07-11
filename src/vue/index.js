@@ -67,19 +67,11 @@ class Vue {
 	}
 
 	initWatch() {
-		// const watchers = this._watchWatchers = {}
-
-		// Object.entries(this.$options.watch || {}).forEach(([k, v]) => {
-		// 	const cb = v;
-		// 	_watchWatchers[k] = new Watcher(this, ()=>this[k], {
-		// 		lazy: true
-		// 	})
-		// 	Object.defineProperty(target, k, {
-		// 		set(val){
-
-		// 		},
-		// 	})
-		// })
+		Object.entries(this.$options.watch || {}).forEach(([k, v]) => {
+			new Watcher(this, k, {
+				user: true
+			}, v)
+		})
 	}
 
 	// data代理到vue实例
