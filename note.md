@@ -31,3 +31,42 @@
 3. 和上面的依赖收集一样，我们在使用`computed属性时`，会触发其对应的`get`；而在`get`中，我们又使用了属于他自己的`watcher`执行了`eval`(watcher.get的变种，增加了ditry处理与当前值的赋予)，让当前的`全局Dep`变成了此时的`computed属性`；由于我们执行了`eavl`，就导致其内部使用的`data`中的属性触发了自己的`get`(Object.defineProperty拦截的get)，于是乎，对应的`data属性`又与此时的`computed属性`建立了`dep`与`watcher`的关联，就像上面说的一样；所以，在我们改变`computed属性`所依赖的`data属性`时，也就会触发视图更新
 
 > 脏值判断。我们为watcher增加了dirty与lazy属性，而lazy属性正好让我们区分当前watcher是否为computed的watcher（lazy为true时）；所以我们可以在每次执行watcher.getter（相当于computed属性的get）时定义为非脏值，执行watcher.update（每次属性变动后通知更新时会触发）时定义为脏值
+
+***.computed的渲染watcher关联**
+
+假设我们有以下结构
+
+```javascript
+...
+<h1>{{ test }}</h1>
+...
+
+const aa = new Vue({
+  data() {
+    return {
+      age: 18,
+    }
+  },
+  computed: {
+    test: {
+      get() {
+        return this.age + '~' 
+      }
+    }
+  }
+}).$mount('#app')
+setTimeout(() => {
+  aa.age = 22
+}, 1000)
+```
+
+那么我们的初始化流程如下：
+
+1. vue实例化创建，data的age属性挂载并`observer依赖监听`，computed的test属性进行`独立监听并`生成其`私有watcher`
+2. render函数创建完毕，生成render的私有watcher，并执行`render函数`；由于`render函数`中使用到了computed的test，故触发其独立监听，并进行第一次`test.getter`；此时我们触发`Dep.target队列`更新，将render的watcher临时放置到`Dep.target队列`以及Dep的全局
+3. 由于`test.getter`触发，其`Dep.target队列末尾`更新为`test的watcher`（render的watcher被移到了前面）；然后涉及到了age的使用，所以又调用了`age的observer依赖监听`，此时age检查到`test的watcher`为全局内容，于是与其建立`dep与watcher的关联`；最终，`test.getter`执行完成，然后将`Dep.target的队列末尾`去除，并取到`上一个watcher`，也就是render
+4. 然后render函数的`watcher.get`执行完毕，将`Dep.target的队列末尾`去除（此后为空状态）
+
+可以看出，age成功收集到了`test的watcher`，所以我们在更改`aa.age`时，就会触发其`test的watcher.get`。但是，age并没有收集到`render的watcher`，就导致了`视图不会更新`；所以我们在`test.getter执行时`、`test的watcher.get执行后`（因为执行后全局的watcher被去除一次，就剩下了一开始的render），让`test的watcher`进行一次`deps`（在这里只有`age的dep`）遍历，并在遍历时让每一个dep去收集当前的`全局watcher（render）`
+
+​	
